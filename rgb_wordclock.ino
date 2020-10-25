@@ -85,6 +85,9 @@ void pushDREI2();
 #define DEBUG_PRINT(str)
 #endif
 
+// board: Arduino Nano
+// bootloader: ATmega328P (Old Bootloader)
+
 void setup() {
 #ifdef DEBUG
   Serial.begin(9600);
@@ -107,6 +110,19 @@ void setup() {
 
   // just set the brightness hard coded to an small value since the LEDs otherwise shine over to their neighbor LEDs
   FastLED.setBrightness(BRIGHTNESS);
+
+  // uncomment this line and adjust the method to set the time. afterwards comment out the line and flash once again
+  // to make sure the time does not get reset every time the controller is rebooting
+  // setTime();
+}
+
+void setTime() {
+  Clock.setYear(20);
+  Clock.setMonth(10);
+  Clock.setDate(25);
+  Clock.setHour(11);
+  Clock.setMinute(23);
+  Clock.setSecond(00);
 }
 
 void loop() {
