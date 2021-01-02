@@ -10,10 +10,12 @@
 #include <Wire.h>
 #include "default_layout.h"
 
-#define BRIGHTNESS 20
 
 //LED defines
 #define NUM_LEDS 121
+
+#define START_OF_NIGHT 24
+#define END_OF_NIGHT 7
 
 //PIN defines
 #define STRIP_DATA_PIN 6
@@ -34,6 +36,9 @@ DS3231 Clock;
 // initial value > 24
 // -> 'linda' will be shown with every reboot
 uint8_t lastLindaShownHour = 25;
+
+// default: quite bright
+uint8_t brightness = 20;
 
 
 //forward declaration
@@ -85,9 +90,6 @@ void pushDREI2();
 #define DEBUG_PRINT(str)
 #endif
 
-// board: Arduino Nano
-// bootloader: ATmega328P (Old Bootloader)
-
 void setup() {
 #ifdef DEBUG
   Serial.begin(9600);
@@ -109,7 +111,7 @@ void setup() {
   Wire.begin();
 
   // just set the brightness hard coded to an small value since the LEDs otherwise shine over to their neighbor LEDs
-  FastLED.setBrightness(BRIGHTNESS);
+  FastLED.setBrightness(brightness);
 
   // uncomment this line and adjust the method to set the time. afterwards comment out the line and flash once again
   // to make sure the time does not get reset every time the controller is rebooting
@@ -135,20 +137,27 @@ void loop() {
 
 void handleShowLinda() {
   showICH_LIEBE_DICH();
-  delay(5000);
+  delay(7000);
   showHeart();
 }
 
 void timeToStrip(uint8_t hours, const uint8_t minutes)
 {
 
-  if (hours != lastLindaShownHour) {
-    handleShowLinda();
-    resetAndBlack();
+  if (hours >= START_OF_NIGHT || hours <= END_OF_NIGHT) {
+    brightness = 2;
+    // since it is night time we do not want to lighten up the room every hour
+  } else {
+    if (hours != lastLindaShownHour) {
+      handleShowLinda();
+      resetAndBlack();
 
-    // remeber that we already did this fun
-    lastLindaShownHour = hours;
+      // remeber that we already did this fun
+      lastLindaShownHour = hours;
+    }
+    brightness = 20;
   }
+  FastLED.setBrightness(brightness);
 
   const int offset = -2;
   if (minutes < 5) {
@@ -282,7 +291,7 @@ void makeParty() {
 void showHeart() {
   DEBUG_PRINT("showing heart");
   resetAndBlack();
-  
+
   // those are the numbers for the heart itself
   pushToStrip(38); pushToStrip(28); pushToStrip(26); pushToStrip(29);
   pushToStrip(25); pushToStrip(41); pushToStrip(35);
@@ -331,7 +340,7 @@ void showHeart() {
     delay(80);
   }
 
-  FastLED.setBrightness(BRIGHTNESS);
+  FastLED.setBrightness(brightness);
 }
 
 void pushToStrip(int ledId) {
