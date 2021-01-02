@@ -90,6 +90,8 @@ void pushDREI2();
 #define DEBUG_PRINT(str)
 #endif
 
+// board: Arduino Nano
+// bootloader: ATmega328P (Old Bootloader)
 void setup() {
 #ifdef DEBUG
   Serial.begin(9600);
